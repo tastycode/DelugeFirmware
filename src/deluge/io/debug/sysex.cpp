@@ -165,7 +165,7 @@ int encodedSize(int size, int fromBits, int toBits) {
 
 void Debug::sysexSongSend(MIDIDevice* device) {
 	// len 1449
-	Debug::println("sysexSongSend");
+	D_PRINTLN("sysexSongSend");
 	display->displayPopup("sysexSongSend");
 	String* xml = currentSong->toXML();
 	const char* charXml = xml->get();
@@ -190,7 +190,7 @@ static size_t load_codesize;
 
 
 static void firstPacket(uint8_t* data, int32_t len) {
-	Debug::println("sysex.cpp/firstPacket");
+	D_PRINTLN("sysex.cpp/firstPacket");
 	uint8_t tmpbuf[0x40] __attribute__((aligned(CACHE_LINE_SIZE)));
 	unpack_7bit_to_8bit(tmpbuf, 0x40, data + 11, 0x4a);
 	uint32_t user_code_start = *(uint32_t*)(tmpbuf + OFF_USER_CODE_START);
