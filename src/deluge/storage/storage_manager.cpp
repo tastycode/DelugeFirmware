@@ -1033,6 +1033,10 @@ int32_t StorageManager::createXMLFile(char const* filePath, bool mayOverwrite) {
 		return error;
 	}
 
+	return beginXML();
+
+}
+int32_t StorageManager::beginXML() {
 	fileBufferCurrentPos = 0;
 	fileTotalBytesWritten = 0;
 	fileAccessFailedDuring = false;

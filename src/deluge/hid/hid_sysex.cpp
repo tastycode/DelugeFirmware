@@ -102,7 +102,7 @@ void HIDSysex::sendDisplayIfChanged() {
 void HIDSysex::sendOLEDData(MIDIDevice* device, bool rle) {
 	if (display->haveOLED()) {
 		const int32_t data_size = 768;
-		const int32_t max_packed_size = 922;
+		const int32_t max_packed_size = packed_size_7(data_size);
 
 		uint8_t reply_hdr[5] = {0xf0, 0x7d, 0x02, 0x40, rle ? 0x01_u8 : 0x00_u8};
 		uint8_t* reply = midiEngine.sysex_fmt_buffer;
@@ -136,7 +136,7 @@ void HIDSysex::send7SegData(MIDIDevice* device) {
 	if (display->have7SEG()) {
 		// aschually 8 segments if you count the dot
 		auto data = display->getLast();
-		const int32_t packed_data_size = 5;
+		const int32_t packed_data_size = packed_size_7(data.size());
 		uint8_t reply[12] = {0xf0, 0x7d, 0x02, 0x41, 0x00, 0x00};
 		pack_8bit_to_7bit(reply + 6, packed_data_size, data.data(), data.size());
 		reply[6 + packed_data_size] = 0xf7; // end of transmission

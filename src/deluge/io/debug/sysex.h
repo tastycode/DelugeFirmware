@@ -17,15 +17,34 @@
 
 #pragma once
 
-#include <cstdint>
+#include <stdint.h>
+#include "definitions_cxx.hpp"
+#include "util/cprint.h"
+#include "gui/l10n/l10n.h"
+#include "hid/display/oled.h"
+#include "io/debug/print.h"
+#include "io/midi/midi_device.h"
+#include "io/midi/midi_engine.h"
+#include "memory/general_memory_allocator.h"
+#include "model/settings/runtime_feature_settings.h"
+#include "util/chainload.h"
+#include "util/functions.h"
+#include "util/pack.h"
+#include "model/song/song.h"
+#include "extern.h"
+#include "util/sysex.h"
+
+
+// #include <cstdint>
 
 class MIDIDevice;
 
-#include "definitions_cxx.hpp"
+
 namespace Debug {
 
 void sysexReceived(MIDIDevice* device, uint8_t* data, int32_t len);
-void sysexDebugPrint(MIDIDevice* device, const char* msg, bool nl);
+void sysexDebugPrint(const char* msg, bool nl);
+void sysexSongSend(MIDIDevice* device);
 
 #ifdef ENABLE_SYSEX_LOAD
 void loadPacketReceived(uint8_t* data, int32_t len);

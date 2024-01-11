@@ -6,15 +6,59 @@
 			"label": "Build Debug",
 			"command": "./dbt",
 			"windows": {
-				"command": "./dbt.cmd",
+				"command": "./dbt.cmd"
 			},
 			"args": [
 				"build",
-				"debug"
+				"debug",
+				"-m",
+				"-t",
+				"dev",
+				"-DENABLE_SYSEX_LOAD=ON",
+				"-DSYSEX_LOGGING_ENABLED=ON"
 			],
 			"group": {
 				"kind": "build",
-				"isDefault": false
+				"isDefault": true
+			},
+			"problemMatcher": {
+				"base": "$gcc",
+				"fileLocation": "absolute"
+			}
+		},
+		{
+			"type": "process",
+			"label": "Upload Image SD",
+			"command": "./dbt",
+			"windows": {
+				"command": "./dbt.cmd"
+			},
+			"args": [
+				"loadfw",
+				"sd",
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": {
+				"base": "$gcc",
+				"fileLocation": "absolute"
+			}
+		},
+		{
+			"type": "process",
+			"label": "View logs",
+			"command": "./dbt",
+			"windows": {
+				"command": "./dbt.cmd"
+			},
+			"args": [
+				"sysex-console",
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
 			},
 			"problemMatcher": {
 				"base": "$gcc",
@@ -26,7 +70,7 @@
 			"label": "Build Release",
 			"command": "./dbt",
 			"windows": {
-				"command": "./dbt.cmd",
+				"command": "./dbt.cmd"
 			},
 			"args": [
 				"build",
@@ -43,10 +87,63 @@
 		},
 		{
 			"type": "process",
+			"label": "Build firmware loader",
+			"command": "gcc",
+			"args": [
+				"-g",
+				"-w",
+				"contrib/loadfw/loadfw.c",
+				"./src/deluge/util/sysex.c",
+				"src/deluge/util/pack.c",
+				"src/deluge/util/pack.c",
+				"-Isrc/deluge" ,
+				"-Icontrib/load" ,
+				"-Isrc/deluge/util" ,
+				"-DENABLE_TEXT_OUTPUT=ON",
+				"-o",
+				"./toolchain/darwin-arm64/syxsrv"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"problemMatcher": {
+				"base": "$gcc",
+				"fileLocation": "absolute"
+			}
+		},
+		{
+			"type": "process",
+			"label": "Build e2e Sysex Verifier",
+			"command": "gcc",
+			"args": [
+				"-g",
+				"-w",
+				"contrib/syxsrv/syxsrv.c",
+				"./src/deluge/util/sysex.c",
+				"src/deluge/util/pack.c",
+				"-Isrc/deluge" ,
+				"-Icontrib/load" ,
+				"-Isrc/deluge/util" ,
+				"-DENABLE_TEXT_OUTPUT=ON",
+				"-o",
+				"./toolchain/darwin-arm64/syxsrv"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"problemMatcher": {
+				"base": "$gcc",
+				"fileLocation": "absolute"
+			}
+		},
+		{
+			"type": "process",
 			"label": "Build RelWithDebInfo",
 			"command": "./dbt",
 			"windows": {
-				"command": "./dbt.cmd",
+				"command": "./dbt.cmd"
 			},
 			"args": [
 				"build",
@@ -67,11 +164,11 @@
 			"problemMatcher": [],
 			"command": "./dbt",
 			"windows": {
-				"command": "./dbt.cmd",
+				"command": "./dbt.cmd"
 			},
 			"args": [
 				"debug",
-				"-j",
+				"-j"
 			]
 		},
 		{
@@ -80,10 +177,10 @@
 			"problemMatcher": [],
 			"command": "./dbt",
 			"windows": {
-				"command": "./dbt.cmd",
+				"command": "./dbt.cmd"
 			},
 			"args": [
-				"debug",
+				"debug"
 			]
 		},
 		{
@@ -92,7 +189,7 @@
 			"problemMatcher": [],
 			"command": "./dbt",
 			"args": [
-				"format",
+				"format"
 			]
 		}
 	]

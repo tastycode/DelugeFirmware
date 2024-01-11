@@ -1,12 +1,14 @@
 from functools import partial
+from pathlib import Path
+from iterfzf import iterfzf
 import itertools
 import multiprocessing
 import os
+import mido
 import subprocess
 import sys
 import shutil
 import sysconfig
-from pathlib import Path
 import time
 import fileinput
 
@@ -162,6 +164,24 @@ def do_parallel_progressbar(func, it, prefix: str, size: int = 60, out=sys.stdou
     print("", flush=True, file=out)
     return result.get()
 
+def resolve_input_device(input_device):
+    input_ports = mido.get_input_names()
+    if input_device not in input_ports:
+        def iter_input_ports():
+            for port in input_ports:
+                yield port
+        input_device = iterfzf(iter_input_ports(), prompt = "'{device}' not found, please choose a port")
+    return input_device
+def resolve_output_device(output_device):
+    output_ports=mido.get_output_names()
+    print(f"Available output_ports: {output_ports}")
+    output_device = args.output
+    if output_device not in output_ports:
+        def iter_output_ports():
+            for port in output_ports:
+                yield port
+        output_device = iterfzf(iter_output_ports(), prompt = "'{device}' not found, please choose a port")
+    return output_device
 
 # Environment extraction
 # from https://stackoverflow.com/a/2214292

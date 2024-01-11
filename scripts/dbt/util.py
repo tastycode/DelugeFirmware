@@ -1,3 +1,4 @@
+import mido
 import os
 import re
 
@@ -5,6 +6,7 @@ import SCons
 from SCons.Script.Main import GetOption
 from SCons.Errors import StopError
 from SCons.Subst import quote_spaces
+from iterfzf import iterfzf
 
 WINPATHSEP_RE = re.compile(r"\\([^\"'\\]|$)")
 SOURCEWALK_RE = re.compile(r"\.[cs][p]{0,2}$", re.IGNORECASE)
@@ -114,3 +116,43 @@ def vprint(*args, **kwargs):
     """
     if vcheck():
         print(*args, **kwargs)
+                
+
+def unpack_7bit_to_8bit(bytes):
+  output = bytearray()
+
+  for b in bytes:
+    # Extract 7-bit value
+    value = b & 0x7F
+    
+    # Extend to 8-bit
+    if value & 0x40:
+      value |= 0x80
+    
+    output.append(value)
+
+    result = []
+    for byte in bytes:
+        result.append(byte & 0x7f)
+        result.append(byte >> 7)
+    return bytearray(result)
+
+def resolve_input_device(default_input):
+    input_device = default_input
+    input_devices=mido.get_input_names()
+    if input_device not in input_devices:
+        def iter_input_devices():
+            for port in input_devices:
+                yield port
+        input_device = iterfzf(iter_input_devices(), prompt = "'{device}' not found, please choose a port")
+    return input_device
+
+def resolve_output_device(default_output):
+    output_device = default_output
+    output_ports=mido.get_output_names()
+    if output_device not in output_ports:
+        def iter_output_ports():
+            for port in output_ports:
+                yield port
+        output_device = iterfzf(iter_output_ports(), prompt = "'{device}' not found, please choose a port")
+    return output_device

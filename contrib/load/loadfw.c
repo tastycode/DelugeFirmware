@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include "util/sysex.h"
+
+#include "definitions.h"
 
 #ifdef USE_ALSA
 #include <alsa/asoundlib.h>
@@ -10,8 +13,17 @@
 
 #include "util/pack.h"
 
+
+/* gcc -g -w  contrib/load/loadfw.c  ./src/deluge/util/sysex.c src/deluge/util/pack.c  src/deluge/util/cprint.c src/lib/printf.c -Icontrib/load -I src/deluge -Isrc/deluge/util -Isrc -DENABLE_TEXT_OUTPUT=ON  -o ./toolchain/darwin-arm64/loadfw*/
+
+// required by printf.h
+void _putchar(char character) {
+	putchar(character);
+}
+
 void usage_exit(char *name) {
 	fprintf(stderr, "usage:   %s -o output.syx {handshake} path/firmware.bin \n", name);
+	fprintf(stderr, "         %s RETRY=seg1,seg2,seg3,seg4 (Retry on failed segments)\n", name);
 	fprintf(stderr, "           (print to stdout with -o -)\n");
 #ifdef USE_ALSA
 	fprintf(stderr, "send to alsa port:\n"
@@ -41,6 +53,9 @@ void send(uint8_t *data, size_t len) {
 		fwrite(data, len, 1, output);
 	}
 }
+
+
+
 
 int main(int argc, char **argv)
 {
@@ -84,6 +99,7 @@ int main(int argc, char **argv)
 
 	uint32_t handshake = 0;
 	sscanf(argv[3], "%x", &handshake);
+	printf("handshake: %x\n", handshake);
 
 	FILE *readin = fopen(argv[4], "rb");
 	if (!readin) {
@@ -99,48 +115,10 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	int segs = ((size+511)&(~511)) >> 9;
-	int total_bytes = segs*512;
 
-	uint32_t crc = get_crc((unsigned char*)buffer, size);
-	printf("transfer size: %d bytes (%d segments)\n", size, segs);
-	printf("crc: %x\n", crc);
+	send_binary(handshake, buffer, size, kBinaryUsercode, send);
 
-	uint8_t data[1024];
-	for (int seg = 0; seg < segs; seg += 1) {
-		int pos_low = seg & 0x7f;
-		int pos_high = (seg >> 7) & 0x7f;
-		int buf_pos = 512*seg;
 
-		unsigned char *bytes = (unsigned char*)(buffer+buf_pos);
-
-		data[0] = 0xf0;
-		data[1] = 0x7d;
-		data[2] = 3;  // debug
-		data[3] = 1;  // send packet
-		pack_8bit_to_7bit(data+4, 5, &handshake, 4);
-		data[9] = pos_low;
-		data[10] = pos_high;
-
-		const int packed_size = 586; // ceil(512+512/7)
-		pack_8bit_to_7bit(data+11, packed_size, bytes, 512);
-		data[11+packed_size] = 0xf7;
-		int len = packed_size+12;
-
-		send(data, len);
-	}
-
-	data[0] = 0xf0;
-	data[1] = 0x7d;
-	data[2] = 3; // debug
-	data[3] = 2; // run
-
-	uint32_t fields[3] = {handshake, size, crc};
-	// TODO: Litle-endian mandated
-	pack_8bit_to_7bit(data+4, 14, fields, 12);
-
-	data[14+4] = 0xf7;
-	send(data, 19);
 
 	if (use_alsa) {
 #ifdef USE_ALSA

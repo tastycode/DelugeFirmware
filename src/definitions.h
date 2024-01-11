@@ -8,6 +8,11 @@
 #define ENABLE_SEQUENTIALITY_TESTS 0
 #endif
 
+#define OFF_USER_CODE_START 0x20
+#define OFF_USER_CODE_END 0x24
+#define OFF_USER_CODE_EXECUTE 0x28
+#define OFF_USER_SIGNATURE 0x2c
+
 #include "RZA1/cpu_specific.h"
 #include "RZA1/system/r_typedefs.h"
 #include "fault_handler.h"

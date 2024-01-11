@@ -48,9 +48,26 @@ int32_t unpack_7bit_to_8bit(uint8_t* dst, int32_t dst_size, uint8_t* src, int32_
 			if (src[ipos] & (1 << j)) {
 				dst[opos + j] |= 0x80;
 			}
+			out_len_real++;
 		}
 	}
+	return out_len_real;
+}
+
+int32_t packed_size_7(int32_t src_len) {
+	int32_t packets = (src_len + 6) / 7;
+	int32_t missing = (7 * packets - src_len); // allow incomplete packets
 	return 8 * packets - missing;
+}
+
+int32_t unpacked_size_8(int32_t src_len) {
+	int32_t packets = (src_len + 7) / 8;
+	int32_t missing = (8 * packets - src_len);
+	if (missing == 7) { // this would be weird
+		packets--;
+		missing = 0;
+	}
+	return 7 * packets - missing;
 }
 
 const int32_t MAX_DENSE_SIZE = 5;
