@@ -72,10 +72,19 @@ ActionResult MatrixDriver::padAction(int32_t x, int32_t y, int32_t velocity) {
 		return ActionResult::DEALT_WITH;
 	}
 
+	bool isCrossScreenPressed = Buttons::isButtonPressed(deluge::hid::button::CROSS_SCREEN_EDIT);
+
+	D_PRINT("UI=%s,PAD_X=%d,PAD_Y=%d,VEL=%d,XC=%d", getCurrentUI()->getName(), x, y, velocity,isCrossScreenPressed);
+
+	// emulate audition pads when cross screen is   pressed
+	if (isCrossScreenPressed) {
+		if (x == kDisplayWidth) {
+			x = x + 1;
+		}
+	}
+
 	padStates[x][y] = velocity;
-#if ENABLE_MATRIX_DEBUG
-	D_PRINT("UI=%s,PAD_X=%d,PAD_Y=%d,VEL=%d", getCurrentUI()->getName(), x, y, velocity);
-#endif
+
 	ActionResult result = getCurrentUI()->padAction(x, y, velocity);
 	if (result == ActionResult::REMIND_ME_OUTSIDE_CARD_ROUTINE) {
 		return ActionResult::REMIND_ME_OUTSIDE_CARD_ROUTINE;
